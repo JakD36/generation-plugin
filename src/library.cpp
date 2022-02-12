@@ -19,6 +19,16 @@ extern "C"
 
     glm::vec2* PoissonDiscSampling(float radius, glm::vec4 regionRect, int samplesBeforeFail, int& size)
     {
+        // Uncomment this code to easily test reloading of plugins
+//        auto tmp = new glm::vec2[5];
+//        for(int i = 0; i < 5; ++i)
+//        {
+//            tmp[i] = glm::vec2(i,i);
+//        }
+//        size = 5;
+//        return tmp;
+
+
         float cellSize = radius / glm::sqrt(2.f);
         glm::ivec2 gridSize = glm::ivec2((int) ceil(regionRect.z / cellSize), (int) ceil(regionRect.w / cellSize));
 
