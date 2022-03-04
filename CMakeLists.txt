@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(unity_dll)
+project(Scatter)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -13,15 +13,13 @@ set(extern_libs
 #    SET (CMAKE_CXX_FLAGS "-fdeclspec")
 #endif()
 
-#add_library(unity_dll SHARED library.cpp library.h)
-file(GLOB files src/*.cpp src/*.h src/*.hpp)
-
-add_library(generation-plugin SHARED ${files})
-
-target_link_libraries(generation-plugin
-        ${extern_libs}
+add_library(Scatter SHARED
+        src/library.cpp
         )
 
+target_link_libraries(Scatter
+        ${extern_libs}
+        )
 
 add_executable(generation-test main.cpp ${files})
 

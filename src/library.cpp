@@ -3,37 +3,15 @@
 #include <vector>
 #include <random>
 
-//#include <iostream>
-
 extern "C"
 {
-    glm::vec3 *Gen100Points()
+    glm::vec2* PoissonDiscSampling(float radius, glm::vec4 regionRect, int samplesBeforeFail, uint32_t& size)
     {
-        return new glm::vec3[100];
-    }
-
-    void FreeArray(glm::vec3 *arr)
-    {
-        delete arr;
-    }
-
-    glm::vec2* PoissonDiscSampling(float radius, glm::vec4 regionRect, int samplesBeforeFail, int& size)
-    {
-        // Uncomment this code to easily test reloading of plugins
-//        auto tmp = new glm::vec2[5];
-//        for(int i = 0; i < 5; ++i)
-//        {
-//            tmp[i] = glm::vec2(i,i);
-//        }
-//        size = 5;
-//        return tmp;
-
-
         float cellSize = radius / glm::sqrt(2.f);
         glm::ivec2 gridSize = glm::ivec2((int) ceil(regionRect.z / cellSize), (int) ceil(regionRect.w / cellSize));
 
         int* grid = new int[gridSize.x * gridSize.y];
-        std::fill(grid, grid + gridSize.x * gridSize.y, 0);
+        memset(grid,0, sizeof(int) * gridSize.x * gridSize.y);
 
 
         std::vector<glm::vec2> points = std::vector<glm::vec2>();
@@ -57,12 +35,8 @@ extern "C"
                 float angle = angleDist(generator);
                 glm::vec2 dir = glm::normalize(glm::vec2(glm::cos(angle), glm::sin(angle)));
 
-//                std::cout << dir.x << " " << dir.y << std::endl;
-
                 std::uniform_real_distribution<float> radialRand(radius, 2.f * radius);
                 glm::vec2 candidate = centre + dir * radialRand(generator);
-
-//                std::cout << candidate.x << " " << candidate.y << std::endl;
 
                 glm::ivec2 cellIdx = glm::ivec2(
                         (int) ((candidate.x - regionRect.x) / cellSize),
@@ -84,16 +58,13 @@ extern "C"
 
         }
 
-        auto output = new glm::vec2[points.size()];
-        for(int i = 0; i < points.size(); ++i)
-        {
-            output[i] = points[i]; // memcpy was causing issues
-        }
         size = points.size();
+        glm::vec2* output = new glm::vec2[size];
+        memcpy(output, points.data(), sizeof(glm::vec2) * size);
         return output;
     }
 
-    bool IsValid(glm::vec2 candidate, glm::vec4 region, glm::ivec2 cellIdx, float radius, const std::vector<glm::vec2> &points, int *grid, glm::ivec2 gridSize)
+    bool IsValid(glm::vec2 candidate, glm::vec4 region, glm::ivec2 cellIdx, float radius, const std::vector<glm::vec2>& points, int *grid, glm::ivec2 gridSize)
     {
 
         glm::vec2 rmin = glm::vec2(region.x, region.y);
