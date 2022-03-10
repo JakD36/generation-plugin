@@ -14,7 +14,8 @@ set(extern_libs
 #endif()
 
 add_library(Scatter SHARED
-        src/library.cpp
+        src/SingleRadiusSampling.cpp
+        src/MultiRadiiSampling.cpp
         )
 
 target_link_libraries(Scatter
