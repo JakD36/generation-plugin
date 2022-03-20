@@ -5,7 +5,7 @@
 
 using namespace std;
 
-PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int inputSize, glm::vec4 regionRect, int samplesBeforeFail, int32_t& outputSize)
+PointData2* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int inputSize, glm::vec4 regionRect, int samplesBeforeFail, int32_t& outputSize)
 {
     float maxRadius = FLT_MIN;
     for(int i = 0; i < inputSize; ++i)
@@ -37,10 +37,10 @@ PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int
         }
     }
 
-    vector<PointData> points = vector<PointData>();
-    vector<PointData> spawnPoints = vector<PointData>
+    vector<PointData2> points = vector<PointData2>();
+    vector<PointData2> spawnPoints = vector<PointData2>
     {
-        PointData
+        PointData2
         {
             glm::vec2(regionRect.x, regionRect.y) + glm::vec2(regionRect.z, regionRect.w) * 0.5f, // Centre
             radiiIndex
@@ -53,7 +53,7 @@ PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int
         // Pick the next point as the centre
         uniform_int_distribution<int> distribution(0, spawnPoints.size()-1);
         int spawnIndex = distribution(generator);
-        PointData& centre = spawnPoints[spawnIndex];
+        PointData2& centre = spawnPoints[spawnIndex];
 
         // Pick the next radius
         rand = radiiDistribution(generator);
@@ -84,7 +84,7 @@ PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int
 
             if (IsValidMultiRadii(candidate, regionRect, cellIdx, radii[radiiIndex], radii, points, grid, gridSize))
             {
-                auto newPoint = PointData
+                auto newPoint = PointData2
                         {
                             candidate,
                             radiiIndex
@@ -106,7 +106,7 @@ PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int
     }
 
     outputSize = points.size();
-    PointData* output = new PointData[outputSize];
+    PointData2* output = new PointData2[outputSize];
     for(int i = 0; i < outputSize; ++i)
     {
         output[i] = points[i];
@@ -114,7 +114,7 @@ PointData* PoissonDiscSamplingMultiRadii(float* radii, float* distributions, int
     return output;
 }
 
-bool IsValidMultiRadii(glm::vec2 candidate, glm::vec4 region, glm::ivec2 cellIdx, float radius, float* radii, const vector<PointData>& points, vector<int>* grid, glm::ivec2 gridSize)
+bool IsValidMultiRadii(glm::vec2 candidate, glm::vec4 region, glm::ivec2 cellIdx, float radius, float* radii, const vector<PointData2>& points, vector<int>* grid, glm::ivec2 gridSize)
 {
 
     glm::vec2 rmin = glm::vec2(region.x, region.y);

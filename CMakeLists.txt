@@ -16,6 +16,7 @@ set(extern_libs
 add_library(Scatter SHARED
         src/SingleRadiusSampling.cpp
         src/MultiRadiiSampling.cpp
+        src/MultiRadiiHeightmap.cpp
         )
 
 target_link_libraries(Scatter
