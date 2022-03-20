@@ -53,16 +53,10 @@ PointData3* PoissonDiscSamplingMultiRadiiHeight(float* radii, float* distributio
             }
     };
 
-
-    while (spawnPoints.empty() == false)
+    uniform_real_distribution<float> posXDist(regionRect.x, regionRect.x + regionRect.z);
+    uniform_real_distribution<float> posYDist(regionRect.y, regionRect.y + regionRect.w);
+    for(int i = 0; i < 25; ++i)
     {
-        // Pick the next point as the centre
-        uniform_int_distribution<int> distribution(0, spawnPoints.size()-1);
-        int spawnIndex = distribution(generator);
-        PointData2& centre = spawnPoints[spawnIndex];
-
-        // Pick the next radius
-        rand = radiiDistribution(generator);
         for(uint16_t j = 0; j < inputSize; ++j)
         {
             if (rand < distributions[j])
@@ -71,11 +65,38 @@ PointData3* PoissonDiscSamplingMultiRadiiHeight(float* radii, float* distributio
                 break;
             }
         }
+        spawnPoints.push_back(PointData2
+        {
+                glm::vec2(posXDist(generator), posYDist(generator)),
+                radiiIndex
+        });
+    }
+
+
+    while (spawnPoints.empty() == false)
+    {
+        // Pick the next point as the centre
+        uniform_int_distribution<int> distribution(0, spawnPoints.size()-1);
+        int spawnIndex = distribution(generator);
+        PointData2& centre = spawnPoints[spawnIndex];
+
+
 
         bool accepted = false;
 
         for (int i = 0; i < samplesBeforeFail; ++i)
         {
+            // Pick the next radius
+            rand = radiiDistribution(generator);
+            for(uint16_t j = 0; j < inputSize; ++j)
+            {
+                if (rand < distributions[j])
+                {
+                    radiiIndex = j;
+                    break;
+                }
+            }
+
             uniform_real_distribution<float> angleDist(0, 2.f * 3.14f);
             float angle = angleDist(generator);
             glm::vec2 dir = glm::normalize(glm::vec2(glm::cos(angle), glm::sin(angle)));
@@ -88,7 +109,10 @@ PointData3* PoissonDiscSamplingMultiRadiiHeight(float* radii, float* distributio
             glm::vec3 normal = SampleNormal(candidate, regionRect, heightmap, heightmapResolution, heightmapScale);
             float gradient = glm::clamp(glm::dot(glm::vec3(0.f,1.f,0.f), normal),0.f,1.f);
             if((acceptedSlopes[radiiIndex].x <= gradient && gradient <= acceptedSlopes[radiiIndex].y) == false)
+            {
                 continue;
+            }
+
 
             if (IsValidMultiRadii(candidate, regionRect, cellIdx, radii[radiiIndex], radii, points, grid, gridSize))
             {
